@@ -1,0 +1,26 @@
+version: '3.4'
+
+services:
+  apiwithdaprsidecar:
+    image: ${DOCKER_REGISTRY-}apiwithdaprsidecar
+    build:
+      context: .
+      dockerfile: ApiWithDaprSidecar/Dockerfile
+
+  apiwithdaprsidecar-dapr:
+    image: "daprio/daprd:latest"
+    container_name: apiwithdaprsidecar-dapr
+    restart: always
+    command: [ 
+      "./daprd",
+      "-app-id",
+      "api-with-dapr-sidecar-api",
+      "-app-port", "80",
+      "-components-path", "/DaprComponents",
+      "-log-level", "debug"
+    ]
+    volumes:
+      - "./DaprComponents/:/DaprComponents"
+    depends_on: 
+      - apiwithdaprsidecar
+    network_mode: "service:apiwithdaprsidecar"
